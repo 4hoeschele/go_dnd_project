@@ -5,23 +5,27 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+    "log"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-    "github.com/gin-contrib/cors"
+
+	"github.com/4hoeschele/go_dnd_project/db"
+	"github.com/4hoeschele/go_dnd_project/ent"
 )
 
 type Character struct {
-	ID		 string    `json:"id"`
-    Name       string `json:"name"`
-    Class      string `json:"class"`
-    Race       string `json:"race"`
-    Strength   int    `json:"strength"`
-    Dexterity  int    `json:"dexterity"`
-    Constitution int  `json:"constitution"`
-    Intelligence int  `json:"intelligence"`
-    Wisdom      int   `json:"wisdom"`
-    Charisma    int   `json:"charisma"`
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	Class        string `json:"class"`
+	Race         string `json:"race"`
+	Strength     int    `json:"strength"`
+	Dexterity    int    `json:"dexterity"`
+	Constitution int    `json:"constitution"`
+	Intelligence int    `json:"intelligence"`
+	Wisdom       int    `json:"wisdom"`
+	Charisma     int    `json:"charisma"`
 }
 
 // create dummy for database
@@ -32,15 +36,25 @@ var characters = []Character{
 }
 
 func init() {
-		err := godotenv.Load()
+	err := godotenv.Load()
 	if err != nil {
 		fmt.Println("Error loading .env file")
 	}
 	fmt.Println("Server is successfully running on port:", os.Getenv("PORT"))
 }
 
-func getCharacters(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, characters)
+func getCharacters(client *ent.Client) gin.HandlerFunc {
+	return gin.HandlerFunc(func(c *gin.Context) {
+        // after query comes my where or so 
+        characters, err := client.Character.Query().All(c)
+        if err != nil {
+            log.Println("Stuff: ", err)
+            return
+        }
+        c.IndentedJSON(http.StatusOK, characters)
+        log.Println("characters", characters)
+
+	})
 }
 
 func getCharactersBy(c *gin.Context) {
@@ -80,10 +94,16 @@ func createCharacter(c *gin.Context) {
 }
 
 func main() {
+	// config -> database -> router
+	client, err := db.SetupEntDatabaseConnection()
+	if err != nil {
+		fmt.Println("Error setting up database connection")
+		return
+	}
 	// setup server
 	router := gin.Default()
 	router.Use(cors.Default())
-	router.GET("/characters", getCharacters)
+	router.GET("/characters", getCharacters(client))
 	router.GET("/characters/:id", getCharactersBy)
 	router.POST("/characters", createCharacter)
 
