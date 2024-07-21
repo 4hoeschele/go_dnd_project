@@ -56,8 +56,8 @@ func getCharacters(client *ent.Client) gin.HandlerFunc {
 	})
 }
 
+// get id from url param
 func getCharactersBy(c *gin.Context) {
-	// get id from url param
 	id := c.Param("id")
 	// grab the character by id
 	char, err := getCharacterByIdHelper(id)
@@ -92,8 +92,8 @@ func createCharacter(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, newCharacter)
 }
 
+// config -> database -> router
 func main() {
-	// config -> database -> router
 	client, err := db.SetupEntDatabaseConnection()
 	if err != nil {
 		fmt.Println("Error setting up database connection")
