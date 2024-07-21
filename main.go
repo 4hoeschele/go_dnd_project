@@ -3,29 +3,28 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
-    "log"
-
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 
 	"github.com/4hoeschele/go_dnd_project/db"
 	"github.com/4hoeschele/go_dnd_project/ent"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 type Character struct {
-	ID           string `json:"id"`
-	Name         string `json:"name"`
-	Class        string `json:"class"`
-	Race         string `json:"race"`
-	Strength     int    `json:"strength"`
-	Dexterity    int    `json:"dexterity"`
-	Constitution int    `json:"constitution"`
-	Intelligence int    `json:"intelligence"`
-	Wisdom       int    `json:"wisdom"`
-	Charisma     int    `json:"charisma"`
+	ID           string `json:"id,omitempty"`
+	Name         string `json:"name,omitempty"`
+	Class        string `json:"class,omitempty"`
+	Race         string `json:"race,omitempty"`
+	Strength     int    `json:"strength,omitempty"`
+	Dexterity    int    `json:"dexterity,omitempty"`
+	Constitution int    `json:"constitution,omitempty"`
+	Intelligence int    `json:"intelligence,omitempty"`
+	Wisdom       int    `json:"wisdom,omitempty"`
+	Charisma     int    `json:"charisma,omitempty"`
 }
 
 // create dummy for database
@@ -45,14 +44,14 @@ func init() {
 
 func getCharacters(client *ent.Client) gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
-        // after query comes my where or so 
-        characters, err := client.Character.Query().All(c)
-        if err != nil {
-            log.Println("Stuff: ", err)
-            return
-        }
-        c.IndentedJSON(http.StatusOK, characters)
-        log.Println("characters", characters)
+		// after query comes my 'where <column name> = ...' or so
+		characters, err := client.Character.Query().All(c)
+		if err != nil {
+			log.Println("Stuff: ", err)
+			return
+		}
+		c.IndentedJSON(http.StatusOK, characters)
+		log.Println("characters", characters)
 
 	})
 }
